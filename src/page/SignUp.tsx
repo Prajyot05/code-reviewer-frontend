@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import LoginBtn from "../components/FillerBtn";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { AuthContext } from "../context/AuthContext";
 
 const SignUp: React.FC = () => {
   const [email, setEmail] = useState<string>("");
@@ -11,6 +12,16 @@ const SignUp: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { isAuthenticated, loading } = useContext(AuthContext)!;
+
+  useEffect(() => {
+    const handleRedirection = () => {
+      if (!loading && isAuthenticated) {
+        return navigate("/");
+      }
+    };
+    handleRedirection();
+  }, [loading, isAuthenticated]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

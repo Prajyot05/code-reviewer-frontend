@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
@@ -11,7 +11,16 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext)!;
+  const { isAuthenticated, loading, login } = useContext(AuthContext)!;
+
+  useEffect(() => {
+    const handleRedirection = () => {
+      if (!loading && isAuthenticated) {
+        return navigate("/");
+      }
+    };
+    handleRedirection();
+  }, [loading, isAuthenticated]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

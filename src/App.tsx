@@ -9,6 +9,7 @@ import Login from "./page/Login";
 import SignUp from "./page/SignUp";
 import { ToastContainer } from "react-toastify";
 import Submissions from "./page/Submissions";
+import NotFound from "./page/NotFound";
 
 const App: React.FC = () => {
   const { loading } = useContext(AuthContext)!;
@@ -36,6 +37,7 @@ const App: React.FC = () => {
           path="/submission/:id"
           element={<Interview mode="submission" />}
         />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <ToastContainer />
     </Router>

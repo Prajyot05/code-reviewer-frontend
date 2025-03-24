@@ -24,6 +24,7 @@ const Interview = ({
   const [isLoading, setIsLoading] = useState(true);
   const [codeLoading, setCodeLoading] = useState(false);
   const [code, setCode] = useState("");
+  const [fetchedLanguage, setFetchedLanguage] = useState<string | null>(null);
   const outputRef = useRef<HTMLDivElement | null>(null);
   const reviewRef = useRef<HTMLDivElement | null>(null);
 
@@ -73,6 +74,7 @@ const Interview = ({
           }
         );
         setQuestionName(res.data.submission.questionName);
+        setFetchedLanguage(res.data.submission.language);
         setQuestion(res.data.submission.question);
         setReview(res.data.submission.review);
         setCode(res.data.submission.prompt);
@@ -228,6 +230,7 @@ const Interview = ({
             onCompile={handleCompilation}
             loading={isLoading}
             originalCode={code}
+            fetchedLanguage={fetchedLanguage || undefined}
           />
           {(isLoading || codeLoading) && (
             <div className="z-20 absolute top-0 left-0 right-0 bottom-0 bg-black opacity-60 flex justify-center items-center rounded-lg">

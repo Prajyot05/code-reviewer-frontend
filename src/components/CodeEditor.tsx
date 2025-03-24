@@ -15,6 +15,7 @@ interface CodeEditorProps {
   onCompile: (code: string, language: string) => void;
   loading: boolean;
   originalCode: string;
+  fetchedLanguage?: string;
 }
 
 const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -22,6 +23,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   onCompile,
   loading,
   originalCode,
+  fetchedLanguage,
 }) => {
   const [code, setCode] = useState<string>(
     originalCode === "" ? `// Start writing your code here!` : originalCode
@@ -30,7 +32,17 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 
   useEffect(() => {
     setCode(originalCode);
-  }, [originalCode]);
+    console.log("Fetched Language: ", fetchedLanguage);
+    fetchedLanguage && setLanguage(fetchedLanguage);
+    // if (fetchedLanguage) {
+    //   const selectedLanguage = languages.find(
+    //     (lang) => lang.value === fetchedLanguage
+    //   );
+    //   if (selectedLanguage) {
+    //     setLanguage(selectedLanguage.value);
+    //   }
+    // }
+  }, [originalCode, fetchedLanguage]);
 
   const languages = [
     { value: "C", label: "C" },

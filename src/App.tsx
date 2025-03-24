@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import JobList from "./page/JobList";
 import Interview from "./page/Interview";
 import Navbar from "./components/Navbar";
@@ -19,7 +19,7 @@ const App: React.FC = () => {
     );
   }
   return (
-    <Router>
+    <>
       <Navbar />
       <Routes>
         <Route path="/" element={<JobList />} />
@@ -40,7 +40,7 @@ const App: React.FC = () => {
         <Route path="*" element={<NotFound />} />
       </Routes>
       <ToastContainer />
-    </Router>
+    </>
   );
 };
 

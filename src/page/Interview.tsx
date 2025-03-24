@@ -5,8 +5,13 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { RingLoader } from "react-spinners";
 
-const Interview = ({ mode }: { mode: "interview" | "submission" }) => {
+const Interview = ({
+  mode,
+}: {
+  mode: "interview" | "submission" | "random";
+}) => {
   const { id } = useParams();
   const [output, setOutput] = useState("");
   const [review, setReview] = useState("");
@@ -16,7 +21,8 @@ const Interview = ({ mode }: { mode: "interview" | "submission" }) => {
   const [timeUsed, setTimeUsed] = useState(0);
   const [memoryUsed, setMemoryUsed] = useState(0);
   const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [codeLoading, setCodeLoading] = useState(false);
   const [code, setCode] = useState("");
   const outputRef = useRef<HTMLDivElement | null>(null);
   const reviewRef = useRef<HTMLDivElement | null>(null);
@@ -24,6 +30,7 @@ const Interview = ({ mode }: { mode: "interview" | "submission" }) => {
   useEffect(() => {
     const token = localStorage.getItem("auth-token");
     const fetchJobQuestion = async () => {
+      setIsLoading(true);
       try {
         const res = await axios.get(
           `${import.meta.env.VITE_BACKEND_URL}/api/jobs/${id}`,
@@ -35,18 +42,21 @@ const Interview = ({ mode }: { mode: "interview" | "submission" }) => {
           }
         );
         if (!res.data.success) {
-          console.log("Failed to fetch Question");
+          toast.error("Failed to fetch Question");
           return;
         }
         setQuestionName(res.data.question.name);
         setQuestion(res.data.question.question);
       } catch (error) {
         console.log("Error fetching Job Question: ", error);
+        toast.error("Failed to fetch Question");
+      } finally {
+        setIsLoading(false);
       }
     };
     const fetchSubmissionDetails = async () => {
       const token = localStorage.getItem("auth-token");
-
+      setIsLoading(true);
       if (!token) {
         setError("No authentication token found.");
         setIsLoading(false);
@@ -73,12 +83,38 @@ const Interview = ({ mode }: { mode: "interview" | "submission" }) => {
         setIsLoading(false);
       }
     };
+    const fetchRandomQuestion = async () => {
+      setIsLoading(true);
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/api/jobs/random`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "x-auth-token": token,
+            },
+          }
+        );
+        if (!res.data.success) {
+          toast.error("Failed to fetch Question");
+          return;
+        }
+        setQuestionName(res.data.name);
+        setQuestion(res.data.question);
+      } catch (error) {
+        console.log("Error fetching Random Question: ", error);
+        toast.error("Failed to fetch Question");
+      } finally {
+        setIsLoading(false);
+      }
+    };
     if (mode == "interview") fetchJobQuestion();
     else if (mode == "submission") fetchSubmissionDetails();
-  }, []);
+    else if (mode == "random") fetchRandomQuestion();
+  }, [id, mode]);
 
   const handleCompilation = async (code: string, language: string) => {
-    setIsLoading(true);
+    setCodeLoading(true);
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/code/compile`,
@@ -111,16 +147,17 @@ const Interview = ({ mode }: { mode: "interview" | "submission" }) => {
       console.error("Error during compilation:", error);
       setError("An error occurred while compiling the code.");
     } finally {
-      setIsLoading(false);
+      setCodeLoading(false);
     }
   };
 
   const handleSubmit = async (code: string, language: string) => {
-    setIsLoading(true);
+    setCodeLoading(true);
     const token = localStorage.getItem("auth-token");
 
     if (!token) {
       console.error("No authentication token found.");
+      setCodeLoading(false);
       return;
     }
 
@@ -160,32 +197,39 @@ const Interview = ({ mode }: { mode: "interview" | "submission" }) => {
       }
     } catch (error: any) {
       console.error("Error submitting code:", error);
+      toast.error("Failed to Submit Code");
       if (error.response) {
         console.error("Server responded with:", error.response.data.message);
       } else {
         console.error("Error with request:", error.message);
       }
     } finally {
-      setIsLoading(false);
+      setCodeLoading(false);
     }
   };
 
   return (
     <div className="bg-gray-900 text-white min-h-screen p-8">
       <div className="flex mt-2 space-x-8">
-        <div className="flex-1 bg-gray-800 p-6 rounded-lg shadow-lg">
-          <h2 className="text-3xl font-semibold mb-4">{questionName}</h2>
-          <p className="text-gray-400">{question}</p>
-        </div>
+        {isLoading ? (
+          <div className="flex justify-center items-center h-[70vh] w-[40%]">
+            <RingLoader size={100} color="#4c6ef5" loading={isLoading} />
+          </div>
+        ) : (
+          <div className="flex-1 bg-gray-800 p-6 rounded-lg shadow-lg w-[40%]">
+            <h2 className="text-3xl font-semibold mb-4">{questionName}</h2>
+            <p className="text-gray-400">{question}</p>
+          </div>
+        )}
 
-        <div className="flex-1 bg-gray-800 p-6 rounded-lg shadow-lg relative">
+        <div className="flex-1 bg-gray-800 p-6 rounded-lg shadow-lg relative w-[60%]">
           <CodeEditor
             onSubmit={handleSubmit}
             onCompile={handleCompilation}
             loading={isLoading}
             originalCode={code}
           />
-          {isLoading && (
+          {(isLoading || codeLoading) && (
             <div className="z-20 absolute top-0 left-0 right-0 bottom-0 bg-black opacity-60 flex justify-center items-center rounded-lg">
               <span className="text-white text-3xl font-semibold">
                 Processing...

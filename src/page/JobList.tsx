@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import FillerBtn from "../components/FillerBtn";
 import { CPagination, CPaginationItem } from "@coreui/react";
 import axios from "axios";
 import { RingLoader } from "react-spinners";
+import GenerateBtn from "../components/GenerateBtn";
 
 interface Job {
   id: string;
@@ -17,6 +18,7 @@ const JobList: React.FC = () => {
   const [jobsPerPage] = useState<number>(8);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchJobs = async (): Promise<void> => {
@@ -84,9 +86,19 @@ const JobList: React.FC = () => {
     setCurrentPage(page);
   };
 
+  const handleRandomNavigate = () => {
+    return navigate("/random");
+  };
+
   return (
     <div className="bg-gray-900 text-white min-h-[90vh] pt-4 pb-20 px-4 relative">
-      <h1 className="text-4xl font-bold mb-6 text-center">Job Listings</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-4xl font-bold mb-6 text-center">All Jobs</h1>
+        <GenerateBtn
+          onClick={handleRandomNavigate}
+          text="Generate Random Question"
+        />
+      </div>
 
       {loading ? (
         <div className="flex justify-center items-center h-[70vh]">

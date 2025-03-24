@@ -141,7 +141,9 @@ const SubmissionsPage: React.FC = () => {
               {submission.questionName}
             </h3>
             <p className="text-gray-400 mb-4 flex-grow">
-              {submission.question}
+              {submission.question.length > 60
+                ? `${submission.question.substring(0, 60)}...`
+                : submission.question}
             </p>
             <div className="text-green-300 text-sm mb-4">
               <strong>Submitted At: </strong>

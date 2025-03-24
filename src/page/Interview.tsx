@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 import CodeEditor from "../components/CodeEditor";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -18,6 +18,8 @@ const Interview = ({ mode }: { mode: "interview" | "submission" }) => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [code, setCode] = useState("");
+  const outputRef = useRef<HTMLDivElement | null>(null);
+  const reviewRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem("auth-token");
@@ -90,9 +92,17 @@ const Interview = ({ mode }: { mode: "interview" | "submission" }) => {
         const { compileStatus, output, timeUsed, memoryUsed } = response.data;
 
         setCompileStatus(compileStatus);
-        setOutput(output);
+        setOutput(String(output));
         setTimeUsed(timeUsed);
         setMemoryUsed(memoryUsed);
+
+        if (outputRef.current) {
+          outputRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+          window.scrollBy(0, 500);
+        }
       } else {
         console.error("Compilation failed:", response.data.message);
         setError(response.data.compileStatus);
@@ -104,8 +114,6 @@ const Interview = ({ mode }: { mode: "interview" | "submission" }) => {
       setIsLoading(false);
     }
   };
-
-  const navigate = useNavigate();
 
   const handleSubmit = async (code: string, language: string) => {
     setIsLoading(true);
@@ -136,7 +144,16 @@ const Interview = ({ mode }: { mode: "interview" | "submission" }) => {
       const data = res.data;
       setReview(data.message);
       toast.success("Saved Submission");
-      return navigate("/submissions");
+
+      // Scroll to the review section after the review is set
+      if (reviewRef.current) {
+        reviewRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start", // Aligns the element to the top of the page
+        });
+        // Additional scroll after the element is in view to move it up or down
+        window.scrollBy(0, 700);
+      }
     } catch (error: any) {
       console.error("Error submitting code:", error);
       if (error.response) {
@@ -174,7 +191,10 @@ const Interview = ({ mode }: { mode: "interview" | "submission" }) => {
 
           <div className="mt-6 space-y-5">
             <h3 className="text-xl font-semibold mb-2">Output</h3>
-            <div className="bg-gray-700 p-4 rounded-lg overflow-x-auto">
+            <div
+              ref={outputRef}
+              className="bg-gray-700 p-4 rounded-lg overflow-x-auto"
+            >
               <p className="text-red-400">{error}</p>
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {output}
@@ -199,7 +219,10 @@ const Interview = ({ mode }: { mode: "interview" | "submission" }) => {
               </div>
             )}
             <h3 className="text-xl font-semibold mt-6 mb-2">Code Review</h3>
-            <div className="bg-gray-700 p-4 rounded-lg overflow-x-auto space-y-4">
+            <div
+              ref={reviewRef}
+              className="bg-gray-700 p-4 rounded-lg overflow-x-auto space-y-4"
+            >
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {review}
               </ReactMarkdown>

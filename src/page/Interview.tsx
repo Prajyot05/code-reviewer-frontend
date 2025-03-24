@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import CodeEditor from "../components/CodeEditor";
 import ReactMarkdown from "react-markdown";
@@ -6,6 +6,16 @@ import remarkGfm from "remark-gfm";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { RingLoader } from "react-spinners";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { duotoneSpace } from "react-syntax-highlighter/dist/esm/styles/prism";
+
+const codeBlockStyle: CSSProperties = {
+  backgroundColor: "#282c34",
+  padding: "10px",
+  borderRadius: "5px",
+  fontSize: "16px",
+  fontFamily: "monospace",
+};
 
 const Interview = ({
   mode,
@@ -272,12 +282,52 @@ const Interview = ({
             <h3 className="text-xl font-semibold mt-6 mb-2">Code Review</h3>
             <div
               ref={reviewRef}
+              className="bg-gray-800 p-6 rounded-lg overflow-x-auto space-y-4 border-l-4 border-purple-500"
+            >
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  p: ({ node, children }) => (
+                    <p className="text-lg text-gray-300 leading-relaxed">
+                      {children}
+                    </p>
+                  ),
+                  code: ({ node, className, children, ...props }) => {
+                    // Extract language from className (e.g., 'language-jsx' -> 'jsx')
+                    const match = /language-(\w+)/.exec(className || "");
+
+                    return match ? (
+                      <SyntaxHighlighter
+                        language={match[1]}
+                        style={{ ...duotoneSpace }}
+                        PreTag="div"
+                        customStyle={codeBlockStyle}
+                        {...props}
+                      >
+                        {String(children).replace(/\n$/, "")} // Handle line
+                        breaks properly
+                      </SyntaxHighlighter>
+                    ) : (
+                      // If no match, render it as plain <code> element
+                      <code className={className} {...props}>
+                        {children}
+                      </code>
+                    );
+                  },
+                }}
+              >
+                {review}
+              </ReactMarkdown>
+            </div>
+
+            {/* <div
+              ref={reviewRef}
               className="bg-gray-700 p-4 rounded-lg overflow-x-auto space-y-4"
             >
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {review}
               </ReactMarkdown>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

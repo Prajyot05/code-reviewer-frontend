@@ -4,6 +4,7 @@ import FillerBtn from "../components/FillerBtn";
 import { useNavigate } from "react-router-dom";
 import { formatDate } from "../utils/features";
 import { RingLoader } from "react-spinners";
+import { toast } from "react-toastify";
 
 interface Submission {
   _id: string;
@@ -15,7 +16,6 @@ interface Submission {
 const SubmissionsPage: React.FC = () => {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [hasMore, setHasMore] = useState<boolean>(true);
 
@@ -27,7 +27,6 @@ const SubmissionsPage: React.FC = () => {
 
     loadingRef.current = true; // Lock the fetching process
     setIsLoading(true);
-    setError(null);
     const token = localStorage.getItem("auth-token");
 
     const cachedSubmissions = localStorage.getItem("code-reviewer-submissions");
@@ -90,10 +89,10 @@ const SubmissionsPage: React.FC = () => {
           Date.now().toString()
         );
       } else {
-        setError("Failed to load submissions.");
+        toast.error("Failed to load submissions.");
       }
     } catch (err) {
-      setError("Error fetching submissions.");
+      toast.error("Error fetching submissions.");
     } finally {
       loadingRef.current = false; // Release the lock
       setIsLoading(false);
@@ -130,7 +129,6 @@ const SubmissionsPage: React.FC = () => {
   return (
     <div className="bg-gray-900 text-white min-h-[90vh] pt-4 pb-20 px-4 relative">
       <h1 className="text-4xl font-bold mb-6 text-center">All Submissions</h1>
-      {error && <div className="text-red-500 text-center mb-4">{error}</div>}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 mt-10">
         {submissions.map((submission) => (
           <div

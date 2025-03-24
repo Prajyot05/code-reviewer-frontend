@@ -21,15 +21,31 @@ const JobList: React.FC = () => {
   useEffect(() => {
     const fetchJobs = async (): Promise<void> => {
       const cachedJobs = localStorage.getItem("code-reviewer-jobs");
-      if (cachedJobs) {
-        const cachedData = JSON.parse(cachedJobs);
-        setJobs(cachedData.jobs);
-        setTotalPages(cachedData.totalPages);
-        setLoading(false);
-        return;
+      const cachedTimestamp = localStorage.getItem(
+        "code-reviewer-jobs-timestamp"
+      );
+
+      // Check if cached data exists and if it's expired (5 minutes)
+      if (cachedJobs && cachedTimestamp) {
+        const now = Date.now();
+        const cacheTime = Number(cachedTimestamp);
+        const cacheExpiry = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+        // If the cache is still valid, use it
+        if (now - cacheTime < cacheExpiry) {
+          const cachedData = JSON.parse(cachedJobs);
+          setJobs(cachedData.jobs);
+          setTotalPages(cachedData.totalPages);
+          setLoading(false);
+          return;
+        } else {
+          // If cache is expired, remove it
+          localStorage.removeItem("code-reviewer-jobs");
+          localStorage.removeItem("code-reviewer-jobs-timestamp");
+        }
       }
 
-      // If data is not cached, fetch from API
+      // If data is not cached or is expired, fetch from API
       try {
         const response = await axios.get(
           `${import.meta.env.VITE_BACKEND_URL}/api/jobs`
@@ -38,13 +54,17 @@ const JobList: React.FC = () => {
         setJobs(data);
         setTotalPages(Math.ceil(data.length / jobsPerPage));
 
-        // Cache the fetched data in localStorage
+        // Cache the fetched data and timestamp in localStorage
         localStorage.setItem(
           "code-reviewer-jobs",
           JSON.stringify({
             jobs: data,
             totalPages: Math.ceil(data.length / jobsPerPage),
           })
+        );
+        localStorage.setItem(
+          "code-reviewer-jobs-timestamp",
+          Date.now().toString()
         );
       } catch (error) {
         console.error("Error fetching jobs:", error);
@@ -54,7 +74,7 @@ const JobList: React.FC = () => {
     };
 
     fetchJobs();
-  }, []);
+  }, [jobsPerPage]);
 
   const indexOfLastJob = currentPage * jobsPerPage;
   const indexOfFirstJob = indexOfLastJob - jobsPerPage;

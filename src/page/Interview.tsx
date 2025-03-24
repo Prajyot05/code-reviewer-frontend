@@ -287,7 +287,7 @@ const Interview = ({
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
-                  p: ({ node, children }) => (
+                  p: ({ children }) => (
                     <p className="text-lg text-gray-300 leading-relaxed">
                       {children}
                     </p>
@@ -297,9 +297,10 @@ const Interview = ({
                     const match = /language-(\w+)/.exec(className || "");
 
                     return match ? (
+                      // @ts-ignore
                       <SyntaxHighlighter
                         language={match[1]}
-                        style={{ ...duotoneSpace }}
+                        style={duotoneSpace as any}
                         PreTag="div"
                         customStyle={codeBlockStyle}
                         {...props}

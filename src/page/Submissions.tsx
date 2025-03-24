@@ -30,6 +30,31 @@ const SubmissionsPage: React.FC = () => {
     setError(null);
     const token = localStorage.getItem("auth-token");
 
+    const cachedSubmissions = localStorage.getItem("code-reviewer-submissions");
+    const cachedTimestamp = localStorage.getItem(
+      "code-reviewer-submissions-timestamp"
+    );
+
+    if (cachedSubmissions && cachedTimestamp) {
+      const now = Date.now();
+      const cacheTime = Number(cachedTimestamp);
+      const cacheExpiry = 5 * 60 * 1000;
+
+      // If the cache is still valid, use it
+      if (now - cacheTime < cacheExpiry) {
+        const cachedData = JSON.parse(cachedSubmissions);
+        setSubmissions(cachedData.submissions);
+        setHasMore(cachedData.hasMore);
+        setIsLoading(false);
+        loadingRef.current = false;
+        return;
+      } else {
+        // If cache is expired, remove it
+        localStorage.removeItem("code-reviewer-submissions");
+        localStorage.removeItem("code-reviewer-submissions-timestamp");
+      }
+    }
+
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_BACKEND_URL}/api/submissions`,
@@ -51,6 +76,19 @@ const SubmissionsPage: React.FC = () => {
           setSubmissions((prev) => [...prev, ...data.data]);
           setCurrentPage((prev) => prev + 1);
         }
+
+        // Cache the fetched data and timestamp in localStorage
+        localStorage.setItem(
+          "code-reviewer-submissions",
+          JSON.stringify({
+            submissions: [...submissions, ...data.data],
+            hasMore: data.data.length > 0,
+          })
+        );
+        localStorage.setItem(
+          "code-reviewer-submissions-timestamp",
+          Date.now().toString()
+        );
       } else {
         setError("Failed to load submissions.");
       }

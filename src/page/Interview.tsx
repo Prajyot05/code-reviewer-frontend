@@ -145,6 +145,10 @@ const Interview = ({ mode }: { mode: "interview" | "submission" }) => {
       setReview(data.message);
       toast.success("Saved Submission");
 
+      // Remove submissions cache
+      localStorage.removeItem("code-reviewer-submissions");
+      localStorage.removeItem("code-reviewer-submissions-timestamp");
+
       // Scroll to the review section after the review is set
       if (reviewRef.current) {
         reviewRef.current.scrollIntoView({

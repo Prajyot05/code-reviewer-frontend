@@ -35,9 +35,12 @@ const App: React.FC = () => {
         />
         <Route
           path="/submission/:id"
-          element={<Interview mode="submission" />}
+          element={<ProtectedRoute element={<Interview mode="submission" />} />}
         />
-        <Route path="/random" element={<Interview mode="random" />} />
+        <Route
+          path="/random"
+          element={<ProtectedRoute element={<Interview mode="random" />} />}
+        />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <ToastContainer />

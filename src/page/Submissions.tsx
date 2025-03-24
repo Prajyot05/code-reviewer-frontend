@@ -3,6 +3,7 @@ import axios from "axios";
 import FillerBtn from "../components/FillerBtn";
 import { useNavigate } from "react-router-dom";
 import { formatDate } from "../utils/features";
+import { RingLoader } from "react-spinners";
 
 interface Submission {
   _id: string;
@@ -116,8 +117,8 @@ const SubmissionsPage: React.FC = () => {
         ))}
       </div>
       {isLoading && (
-        <div className="text-center text-white mt-6">
-          <p>Loading more submissions...</p>
+        <div className="flex justify-center items-center mt-20">
+          <RingLoader size={60} color="#4c6ef5" loading={isLoading} />
         </div>
       )}
     </div>

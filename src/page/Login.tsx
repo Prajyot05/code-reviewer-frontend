@@ -5,6 +5,7 @@ import { AuthContext } from "../context/AuthContext";
 import LoginBtn from "../components/FillerBtn";
 import "react-toastify/dist/ReactToastify.css";
 import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -78,9 +79,12 @@ const Login: React.FC = () => {
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-400">
             Don't have an account?{" "}
-            <a href="/signup" className="text-indigo-400 hover:text-indigo-600">
+            <Link
+              to="/signup"
+              className="text-indigo-400 hover:text-indigo-600"
+            >
               Sign up
-            </a>
+            </Link>
           </p>
         </div>
       </div>

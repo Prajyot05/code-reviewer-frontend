@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AuthContext } from "../context/AuthContext";
+import { Link } from "react-router-dom";
 
 const SignUp: React.FC = () => {
   const [email, setEmail] = useState<string>("");
@@ -113,9 +114,9 @@ const SignUp: React.FC = () => {
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-400">
             Already have an account?{" "}
-            <a href="/login" className="text-indigo-400 hover:text-indigo-600">
+            <Link to="/login" className="text-indigo-400 hover:text-indigo-600">
               Login
-            </a>
+            </Link>
           </p>
         </div>
       </div>
